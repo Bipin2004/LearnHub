@@ -17,7 +17,7 @@ import './index.css';
 
 const App = () => {
   const [user, setUser] = useState(null);
-  const location = useLocation(); // Get the current route
+  const location = useLocation();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -31,16 +31,12 @@ const App = () => {
     setUser(null);
   };
 
-  // Define pages where Reviews should NOT be displayed
   const hideReviewsOnPages = ['/login', '/signup', '/certificate'];
-  const shouldShowReviews = !hideReviewsOnPages.includes(location.pathname);
+  const shouldShowReviews = !hideReviewsOnPages.some(path => location.pathname === path || location.pathname.startsWith(path));
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-indigo-600 to-teal-500">
-      {/* Particle Background */}
       <ParticlesBackground />
-
-      {/* Navbar */}
       <nav className="relative z-10 bg-indigo-700 shadow-lg">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold text-white hover:text-teal-300 transition-colors duration-300">
@@ -50,9 +46,6 @@ const App = () => {
             <Link to="/courses" className="text-white hover:text-teal-300 transition-colors duration-300">
               Courses
             </Link>
-            <Link to="/quizzes" className="text-white hover:text-teal-300 transition-colors duration-300">
-              Quizzes
-            </Link>
             <Link to="/certificate" className="text-white hover:text-teal-300 transition-colors duration-300">
               Certificate
             </Link>
@@ -61,28 +54,29 @@ const App = () => {
                 Logout
               </Button>
             ) : (
-              <Link to="/login" className="text-white hover:text-teal-300 transition-colors duration-300">
-                Login
-              </Link>
+              <>
+                <Link to="/login" className="text-white hover:text-teal-300 transition-colors duration-300">
+                  Login
+                </Link>
+                <Link to="/signup" className="text-white hover:text-teal-300 transition-colors duration-300">
+                  Signup
+                </Link>
+              </>
             )}
           </div>
         </div>
       </nav>
-
-      {/* Main Content */}
       <div className="relative z-10 container mx-auto px-4 py-8">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/:id" element={<CourseDetails />} />
-          <Route path="/quizzes" element={<Quizzes />} />
+          <Route path="/courses/:courseId/quizzes" element={<Quizzes />} />
           <Route path="/certificate" element={<Certificate />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Routes>
       </div>
-
-      {/* Conditionally render Reviews and Footer */}
       <div className="relative z-10">
         {shouldShowReviews && <Reviews />}
         <Footer />
@@ -91,7 +85,6 @@ const App = () => {
   );
 };
 
-// Wrap App with Router to use useLocation
 const AppWrapper = () => (
   <Router>
     <App />

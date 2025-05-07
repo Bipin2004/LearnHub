@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom'; // Import useParams to get courseId
 import { getQuizzesByCourseId } from '../Services/Api';
-import Button from '../components/Button'; // Import Button component
+import Button from '../components/Button';
 
 const Quizzes = () => {
+  const { courseId } = useParams(); // Get courseId from URL
   const [quizzes, setQuizzes] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -10,27 +12,29 @@ const Quizzes = () => {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
-        const courseId = '1'; // Replace with dynamic courseId if needed
-        const data = await getQuizzesByCourseId(courseId);
+        if (!courseId) {
+          throw new Error('Course ID is missing.');
+        }
+        const data = await getQuizzesByCourseId(courseId); // Use dynamic courseId
         setQuizzes(data);
       } catch (err) {
-        setError('Failed to load quizzes.');
+        setError('Failed to load quizzes: ' + err.message);
       } finally {
         setLoading(false);
       }
     };
     fetchQuizzes();
-  }, []);
+  }, [courseId]); // Re-fetch if courseId changes
 
   if (loading) return <p className="text-gray-600 text-center">Loading quizzes...</p>;
   if (error) return <p className="text-red-500 text-center">{error}</p>;
 
   return (
     <div className="py-10 animate-fade-in">
-      <h2 className="text-3xl font-semibold text-gray-800 mb-6 text-center">Quizzes</h2>
+      <h2 className="text-3xl font-semibold text-gray-800 mb-6 text-center">Quizzes for Course</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {quizzes.length === 0 ? (
-          <p className="text-gray-600 text-center col-span-full">No quizzes available.</p>
+          <p className="text-gray-600 text-center col-span-full">No quizzes available for this course.</p>
         ) : (
           quizzes.map((quiz) => (
             <div

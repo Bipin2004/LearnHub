@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCourseById, enrollCourse } from '../Services/Api';
 import { auth } from '../Services/Api';
-import Button from '../components/Button'; // Import Button component
+import Button from '../components/Button';
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -47,9 +47,14 @@ const CourseDetails = () => {
       <div className="bg-gray-50 p-8 rounded-xl shadow-xl max-w-2xl mx-auto">
         <h2 className="text-3xl font-semibold text-gray-800 mb-4">{course.title}</h2>
         <p className="text-gray-600 mb-6">{course.description}</p>
-        <Button onClick={handleEnroll} className="w-full">
-          Enroll Now
-        </Button>
+        <div className="space-y-4">
+          <Button onClick={handleEnroll} className="w-full">
+            Enroll Now
+          </Button>
+          <Button to={`/courses/${id}/quizzes`} className="w-full">
+            View Quizzes
+          </Button>
+        </div>
       </div>
     </div>
   );
