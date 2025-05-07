@@ -38,11 +38,11 @@ const App = () => {
     <div className="relative min-h-screen bg-gradient-to-br from-indigo-600 to-teal-500">
       <ParticlesBackground />
       <nav className="relative z-10 bg-indigo-700 shadow-lg">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="w-full max-w-[1440px] mx-auto pl-4 pr-2 sm:pl-6 sm:pr-3 lg:pl-8 lg:pr-4 flex items-center justify-between py-4">
           <Link to="/" className="text-2xl font-bold text-white hover:text-teal-300 transition-colors duration-300">
             LearnHub
           </Link>
-          <div className="space-x-4">
+          <div className="flex items-center space-x-4 ml-auto">
             <Link to="/courses" className="text-white hover:text-teal-300 transition-colors duration-300">
               Courses
             </Link>
@@ -58,7 +58,10 @@ const App = () => {
                 <Link to="/login" className="text-white hover:text-teal-300 transition-colors duration-300">
                   Login
                 </Link>
-                <Link to="/signup" className="text-white hover:text-teal-300 transition-colors duration-300">
+                <Link
+                  to="/signup"
+                  className="text-white bg-indigo-500 hover:bg-teal-500 px-4 py-2 rounded-md transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                >
                   Signup
                 </Link>
               </>

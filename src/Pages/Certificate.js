@@ -9,7 +9,7 @@ const Certificate = () => {
         <p className="text-gray-600 mb-6">
           Congratulations! You have completed the course.
         </p>
-        <Button>
+        <Button className="justify-center align-center" to="/certificate/download">
           Download Certificate
         </Button>
       </div>

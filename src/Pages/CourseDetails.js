@@ -48,12 +48,16 @@ const CourseDetails = () => {
         <h2 className="text-3xl font-semibold text-gray-800 mb-4">{course.title}</h2>
         <p className="text-gray-600 mb-6">{course.description}</p>
         <div className="space-y-4">
-          <Button onClick={handleEnroll} className="w-full">
-            Enroll Now
-          </Button>
-          <Button to={`/courses/${id}/quizzes`} className="w-full">
-            View Quizzes
-          </Button>
+          <div className="flex justify-center">
+            <Button onClick={handleEnroll} className="w-40">
+              Enroll Now
+            </Button>
+          </div>
+          <div className="flex justify-center">
+            <Button to={`/courses/${id}/quizzes`} className="w-40">
+              View Quizzes
+            </Button>
+          </div>
         </div>
       </div>
     </div>
