@@ -31,12 +31,21 @@ const App = () => {
     setUser(null);
   };
 
+  // Determine if the current page is the home page
+  const isHomePage = location.pathname === '/';
+
+  // Conditionally apply the gradient background and particles
+  const mainClassName = isHomePage
+    ? "relative min-h-screen bg-black"
+    : "relative min-h-screen bg-gradient-to-br from-indigo-600 to-teal-500";
+
   const hideReviewsOnPages = ['/login', '/signup', '/certificate'];
   const shouldShowReviews = !hideReviewsOnPages.some(path => location.pathname === path || location.pathname.startsWith(path));
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-indigo-600 to-teal-500">
-      <ParticlesBackground />
+    <div className={mainClassName}>
+      {/* Only show ParticlesBackground on non-home pages */}
+      {!isHomePage && <ParticlesBackground />}
       <nav className="relative z-10 bg-indigo-700 shadow-lg">
         <div className="w-full max-w-[1440px] mx-auto pl-4 pr-2 sm:pl-6 sm:pr-3 lg:pl-8 lg:pr-4 flex items-center justify-between py-4">
           <Link to="/" className="text-2xl font-bold text-white hover:text-teal-300 transition-colors duration-300">

@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, setDoc, getDoc, query, limit } from "firebase/firestore";
 
 // Check if Firebase environment variables are loaded
 if (!process.env.REACT_APP_FIREBASE_API_KEY) {
@@ -82,6 +82,25 @@ export const getQuizzesByCourseId = async (courseId) => {
     return quizzes;
   } catch (error) {
     throw new Error(`Error fetching quizzes: ${error.message}`);
+  }
+};
+
+// Fetch the first 3 courses as featured courses
+export const getFeaturedCourses = async () => {
+  try {
+    const coursesQuery = query(collection(db, 'courses'), limit(3));
+    const querySnapshot = await getDocs(coursesQuery);
+    const courses = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    if (courses.length === 0) {
+      throw new Error('No featured courses found.');
+    }
+    console.log('Featured courses:', courses);
+    return courses;
+  } catch (error) {
+    throw new Error(`Error fetching featured courses: ${error.message}`);
   }
 };
 
