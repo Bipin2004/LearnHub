@@ -93,7 +93,7 @@ const Home = () => {
               <p className="text-gray-300 mb-4">"The quizzes and certificates keep me motivated to learn more."</p>
               <p className="text-indigo-400 font-medium">John D.</p>
             </div>
-            <div className="bg-zinc-600 p-6 rounded-lg shadow-lg">
+            <div className= "bg-zinc-600 p-6 rounded-lg shadow-lg">
               <p className="text-gray-300 mb-4">"I love the community support and expert instructors!"</p>
               <p className="text-indigo-400 font-medium">Emily R.</p>
             </div>

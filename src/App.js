@@ -9,6 +9,7 @@ import Quizzes from './Pages/Quizzes';
 import Certificate from './Pages/Certificate';
 import Login from './Pages/Login';
 import Signup from './Pages/Signup';
+import YourCourses from './Pages/YourCourses';
 import Reviews from './components/Review';
 import Footer from './components/Footer';
 import ParticlesBackground from './components/ParticlesBackground';
@@ -55,6 +56,11 @@ const App = () => {
             <Link to="/courses" className="text-white hover:text-teal-300 transition-colors duration-300">
               Courses
             </Link>
+            {user && (
+              <Link to="/your-courses" className="text-white hover:text-teal-300 transition-colors duration-300">
+                Your Courses
+              </Link>
+            )}
             <Link to="/certificate" className="text-white hover:text-teal-300 transition-colors duration-300">
               Certificate
             </Link>
@@ -87,6 +93,7 @@ const App = () => {
           <Route path="/certificate" element={<Certificate />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/your-courses" element={<YourCourses />} />
         </Routes>
       </div>
       <div className="relative z-10">

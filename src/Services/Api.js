@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { getFirestore, collection, getDocs, doc, setDoc, getDoc, query, limit } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, setDoc, getDoc, query, limit, where } from "firebase/firestore";
 
 // Check if Firebase environment variables are loaded
 if (!process.env.REACT_APP_FIREBASE_API_KEY) {
@@ -71,6 +71,44 @@ export const enrollCourse = async (userId, courseId) => {
     });
   } catch (error) {
     throw new Error(`Error enrolling course: ${error.message}`);
+  }
+};
+
+export const isUserEnrolled = async (userId, courseId) => {
+  if (!userId || !courseId) {
+    return false;
+  }
+  try {
+    const enrollmentRef = doc(db, 'enrollments', `${userId}_${courseId}`);
+    const enrollmentSnap = await getDoc(enrollmentRef);
+    return enrollmentSnap.exists();
+  } catch (error) {
+    console.error('Error checking enrollment:', error);
+    return false;
+  }
+};
+
+export const getEnrolledCourses = async (userId) => {
+  if (!userId) {
+    throw new Error('User ID is required.');
+  }
+  try {
+    // Fetch enrollments for the user
+    const enrollmentsQuery = query(collection(db, 'enrollments'), where('userId', '==', userId));
+    const enrollmentSnapshot = await getDocs(enrollmentsQuery);
+    const enrolledCourseIds = enrollmentSnapshot.docs.map(doc => doc.data().courseId);
+
+    // If no enrollments, return empty array
+    if (enrolledCourseIds.length === 0) {
+      return [];
+    }
+
+    // Fetch course details for each enrolled course
+    const coursesPromises = enrolledCourseIds.map(courseId => getCourseById(courseId));
+    const courses = await Promise.all(coursesPromises);
+    return courses.filter(course => course !== null); // Filter out any null results
+  } catch (error) {
+    throw new Error(`Error fetching enrolled courses: ${error.message}`);
   }
 };
 

@@ -1,87 +1,130 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getCourseById, enrollCourse } from '../Services/Api';
-import { auth } from '../Services/Api';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { getCourseById, enrollCourse, isUserEnrolled } from '../Services/Api';
 import Button from '../components/Button';
+import { auth } from '../Services/Api';
 
 const CourseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [course, setCourse] = useState(null);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [flashMessage, setFlashMessage] = useState(null);
 
   useEffect(() => {
+    // Listen for auth state changes
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        console.log('User ID:', currentUser.uid); // Debug: Log user ID
+        // Check if the user is already enrolled in the course
+        const checkEnrollment = async () => {
+          try {
+            const enrolled = await isUserEnrolled(currentUser.uid, id);
+            setIsEnrolled(enrolled);
+          } catch (err) {
+            console.error('Error checking enrollment:', err);
+          }
+        };
+        checkEnrollment();
+      } else {
+        console.log('No user logged in');
+      }
+    });
+
+    // Fetch course details
     const fetchCourse = async () => {
       try {
+        console.log('Course ID:', id); // Debug: Log course ID
         const data = await getCourseById(id);
-        // Validate "What you'll learn"
-        let whatYoullLearn = data["What you'll learn"];
-        if (!Array.isArray(whatYoullLearn)) {
-          console.warn(`"What you'll learn" for course ${id} is not an array:`, whatYoullLearn);
-          whatYoullLearn = ['Learning outcomes not available.'];
-        } else if (whatYoullLearn.length === 0) {
-          whatYoullLearn = ['No learning outcomes specified.'];
+        if (!data) {
+          setError('Course not found.');
+        } else {
+          setCourse(data);
         }
-        setCourse({
-          ...data,
-          whatYoullLearn, // Store it as whatYoullLearn for consistency in the component
-          duration: data.duration || 'Duration not specified.',
-        });
       } catch (err) {
-        setError('Failed to load course details.');
-      } finally {
-        setLoading(false);
+        setError('Failed to load course: ' + err.message);
       }
     };
+
     fetchCourse();
+
+    return () => unsubscribe();
   }, [id]);
 
   const handleEnroll = async () => {
-    if (!auth.currentUser) {
+    if (!user) {
       navigate('/login');
       return;
     }
+
     try {
-      await enrollCourse(id, auth.currentUser.uid);
-      alert('Enrolled successfully!');
+      console.log('Enrolling user:', user.uid, 'in course:', id); // Debug: Log before enrolling
+      await enrollCourse(user.uid, id);
+      setIsEnrolled(true);
+      setFlashMessage('Course enrolled!');
+      // Clear the flash message after 3 seconds
+      setTimeout(() => setFlashMessage(null), 3000);
     } catch (err) {
-      setError('Failed to enroll in the course.');
+      console.error('Enrollment error:', err.message); // Debug: Log the exact error
+      setError('Failed to enroll: ' + err.message);
     }
   };
 
-  if (loading) return <p className="text-gray-600 text-center">Loading...</p>;
-  if (error) return <p className="text-red-500 text-center">{error}</p>;
-  if (!course) return <p className="text-gray-600 text-center">Course not found.</p>;
+  if (error) {
+    return <p className="text-red-400 text-center">{error}</p>;
+  }
+
+  if (!course) {
+    return <p className="text-gray-400 text-center">Loading course...</p>;
+  }
 
   return (
-    <div className="py-10 animate-fade-in">
-      <div className="bg-gray-50 p-8 rounded-xl shadow-xl max-w-2xl mx-auto">
-        <h2 className="text-3xl font-semibold text-gray-800 mb-4">{course.title}</h2>
-        <p className="text-gray-600 mb-6 leading-relaxed">{course.description}</p>
-        <div className="mb-6">
-          <h3 className="text-xl font-medium text-gray-800 mb-3">What You'll Learn</h3>
-          <ul className="list-disc list-inside text-gray-600 space-y-2">
-            {course.whatYoullLearn.map((item, index) => (
-              <li key={index} className="leading-relaxed">{item}</li>
-            ))}
-          </ul>
+    <div className="container mx-auto px-4 py-8">
+      {/* Flash Message */}
+      {flashMessage && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+          {flashMessage}
         </div>
-        <div className="mb-8">
-          <h3 className="text-xl font-medium text-gray-800 mb-3">Duration</h3>
-          <p className="text-gray-600">{course.duration}</p>
-        </div>
-        <div className="flex justify-center space-x-4 flex-wrap gap-y-4">
-          <Button onClick={handleEnroll} className="w-40 bg-indigo-700 hover:bg-teal-600">
-            Enroll Now
+      )}
+
+      <h1 className="text-4xl font-bold text-white mb-4">{course.title}</h1>
+      <p className="text-gray-300 mb-6">{course.description}</p>
+
+      <div className="bg-zinc-800 p-6 rounded-lg shadow-lg mb-6">
+        <h2 className="text-2xl font-semibold text-white mb-4">What You'll Learn</h2>
+        <ul className="list-disc list-inside text-gray-300">
+          {course["What you'll learn"]?.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold text-white mb-2">Duration</h2>
+        <p className="text-gray-300">{course.duration}</p>
+      </div>
+
+      <div className="flex space-x-4">
+        <Button
+          onClick={handleEnroll}
+          className={`${
+            isEnrolled || !user ? 'bg-gray-500 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-400'
+          } text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300`}
+          disabled={isEnrolled || !user}
+        >
+          {isEnrolled ? 'Already Enrolled' : 'Enroll Now'}
+        </Button>
+        <Link to={`/courses/${id}/quizzes`}>
+          <Button className="bg-indigo-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-400 transition-all duration-300">
+            Take Quiz
           </Button>
-          <Button to={`/courses/${id}/quizzes`} className="w-40 bg-indigo-500 hover:bg-teal-400">
-            View Quizzes
-          </Button>
-        </div>
+        </Link>
       </div>
     </div>
   );
 };
 
-export default CourseDetails;
+export default CourseDetails;   
